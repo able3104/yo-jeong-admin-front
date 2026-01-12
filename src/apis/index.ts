@@ -143,9 +143,19 @@ export const enrollAgencyApi = async (data: enrollAgencyRequest) => {
 
 interface getStatusAgencyRequest {}
 
+export interface quoteInfo {
+  quoteId: number;
+  customerName: string;
+  costomerPhoneNumber: string;
+  quoteCode: string;
+  createTime: Date;
+  isUserVisit: boolean;
+}
+
 export interface getStatusAgencyResponse {
   quoteCount: number;
   completeQuoteCount: number;
+  quotes: quoteInfo[];
 }
 
 export const getStatusAgencyApi = async () => {
@@ -186,14 +196,32 @@ interface getQuoteDetailRequest {
   quoteCode: string;
 }
 
+export interface getQuoteDetailResponse {
+  isPhoneActive: boolean;
+  customerName: string;
+  customerEmail: string;
+  phoneBrand: string;
+  phoneName: string;
+  phoneVolume: string;
+  phonePlanName: string;
+  subscriptionType: string;
+  subsidyByTelecom: number;
+  subsidyByAgency: number;
+}
+
 export const getQuoteDetailApi = async (data: getQuoteDetailRequest) => {
   try {
-    const res = await defaultApiClient.get(
-      `/agency/getQuoteDetail?quoteCode=${data.quoteCode}`
+    const res = await defaultApiClient.get<getQuoteDetailResponse>(
+      "/agency/getQuoteDetail",
+      {
+        params: {
+          // 서버 스웨거에서 쿼리 파라미터 이름이 'quoteCode'인지 'quote_code'인지 확인하세요.
+          auth_code: data.quoteCode,
+        },
+      }
     );
     return res.data;
   } catch (error) {
-    console.error("Error in getQuoteDetailApi:", error);
     throw error;
   }
 };

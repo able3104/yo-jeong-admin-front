@@ -15,42 +15,43 @@ const MainPage = () => {
   const [selectedQuoteCode, setSelectedQuoteCode] = useState<string>("");
 
   useEffect(() => {
-    // 1. 토큰이 없으면 접근 차단
     const token = localStorage.getItem("accessToken");
     if (!token) {
       navigate("/login");
       return;
     }
 
-    // 2. 실데이터 가져오기
-    const fetchAgencyData = async () => {
+    const fetchData = async () => {
       try {
         const data = await getStatusAgencyApi();
         setStatusAgency(data);
+
+        // 데이터가 있다면 첫 번째 항목을 자동으로 선택
+        if (data.quotes && data.quotes.length > 0) {
+          setSelectedQuoteCode(data.quotes[0].quoteCode);
+        }
       } catch (error) {
-        console.error("데이터 로딩 실패:", error);
+        console.error("현황 데이터 로딩 실패");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchAgencyData();
+    fetchData();
   }, [navigate]);
 
   if (isLoading)
-    return (
-      <div className="p-20 text-center">현황 데이터를 불러오는 중입니다...</div>
-    );
+    return <div className="p-20 text-center">데이터를 불러오는 중...</div>;
 
   return (
     <>
       <Header />
       <PageWrapper className="flex flex-col gap-5">
-        {/* 서버에서 받아온 데이터를 props로 전달 */}
         <QuoteInfo statusAgency={statusAgency} />
-
         <div className="flex flex-row gap-5">
+          {/* 서버에서 받아온 실제 quotes 배열 전달 */}
           <QuoteList
+            quotes={statusAgency?.quotes || []}
             selectedQuoteCode={selectedQuoteCode}
             setSelectedQuoteCode={setSelectedQuoteCode}
           />
